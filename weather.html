@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather Now</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #87ceeb, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 40px 20px;
+      color: #fff;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .weather-card {
+      background: rgba(30,34,54,0.9);
+      color: #f3f3f3;
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .temp {
+      font-size: 3em;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+    .condition {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+    }
+    .wind {
+      font-size: 1em;
+      opacity: 0.9;
+    }
+    .error {
+      margin-top: 15px;
+      color: #ffdddd;
+      background: rgba(255,0,0,0.3);
+      padding: 10px 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container text-center">
+    <h1>🌤 Weather Now</h1>
+    <div class="row justify-content-center mb-4">
+      <div class="col-12 col-md-6 col-lg-4 d-flex gap-2">
+        <input type="text" id="city" class="form-control rounded-pill" placeholder="Enter city name">
+        <button onclick="getWeather()" class="btn btn-primary rounded-pill">Search</button>
+      </div>
+    </div>
+    <div id="result" class="row justify-content-center"></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function getWeather() {
+      const city = document.getElementById("city").value.trim();
+      const result = document.getElementById("result");
+      result.innerHTML = "<p>Loading...</p>";
+      if (!city) {
+        result.innerHTML = "<p class='error'>Please enter a city</p>";
+        return;
+      }
+      try {
+        let geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`);
+        let geoData = await geoRes.json();
+        if (!geoData.results || geoData.results.length === 0) {
+          result.innerHTML = "<p class='error'>❌ City not found</p>";
+          return;
+        }
+        const { latitude, longitude, name, country } = geoData.results[0];
+        let weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+        let weatherData = await weatherRes.json();
+        let w = weatherData.current_weather;
+        const weatherCodes = {
+          0: "☀️ Clear Sky",
+          1: "🌤 Mainly Clear",
+          2: "⛅ Partly Cloudy",
+          3: "☁️ Overcast",
+          45: "🌫 Fog",
+          48: "🌫 Rime Fog",
+          51: "🌦 Light Drizzle",
+          61: "🌧 Light Rain",
+          63: "🌧 Moderate Rain",
+          65: "🌧 Heavy Rain",
+          71: "❄️ Light Snow",
+          73: "❄️ Moderate Snow",
+          75: "❄️ Heavy Snow",
+          95: "⛈ Thunderstorm"
+        };
+        let condition = weatherCodes[w.weathercode] || "Unknown";
+        result.innerHTML = `
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="weather-card">
+              <h2>${name}, ${country}</h2>
+              <div class="temp">${w.temperature}°C</div>
+              <div class="condition">${condition}</div>
+              <div class="wind">💨 Wind: ${w.windspeed} km/h</div>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        result.innerHTML = "<p class='error'>⚠️ Something went wrong!</p>";
+      }
+    }
+  </script>
+</body>
+</html>
