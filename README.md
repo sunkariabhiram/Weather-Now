@@ -4,18 +4,18 @@ A simple weather app that shows current temperature, wind, and weather condition
 
 Features
 
-Display current weather for a chosen city
+-> Display current weather for a chosen city
 
-Shows temperature, wind speed, and conditions
+-> Shows temperature, wind speed, and conditions
 
-Mobile-friendly and responsive design
+-> Mobile-friendly and responsive design
 
 Technology Stack
 
-HTML
+-> HTML
 
-CSS
+-> CSS
 
-JavaScript
+-> JavaScript
 
-Open-Meteo API
+-> Open-Meteo API
